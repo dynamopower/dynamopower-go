@@ -10,7 +10,7 @@ var connections = make(map[string]*dynamodb.DynamoDB)
 
 // Connect to DynamoDB. Set region to "local" to connect
 // to DynamoDB Local on port 8000
-func connect(alias, accessKey, secretKey, region string) bool {
+func Connect(alias, accessKey, secretKey, region string) bool {
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -25,7 +25,7 @@ func connect(alias, accessKey, secretKey, region string) bool {
 }
 
 // Remove a connection from the list. Returns true if the connection was removed
-func disconnect(alias string) bool {
+func Disconnect(alias string) bool {
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -38,7 +38,7 @@ func disconnect(alias string) bool {
 }
 
 // Get a connection. nil is returned if the connection does not exist
-func get(alias string) *dynamodb.DynamoDB {
+func Get(alias string) *dynamodb.DynamoDB {
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -50,7 +50,7 @@ func get(alias string) *dynamodb.DynamoDB {
 }
 
 // List all connections
-func list() []string {
+func List() []string {
 	keys := make([]string, len(connections))
 
 	i := 0
