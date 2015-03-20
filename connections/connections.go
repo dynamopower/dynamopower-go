@@ -10,7 +10,7 @@ var connections = make(map[string]*dynamodb.DynamoDB)
 
 // Connect to DynamoDB. Set region to "local" to connect
 // to DynamoDB Local on port 8000
-func Connect(alias, accessKey, secretKey, region string) bool {
+func Connect(alias, accessKey, secretKey, region string) *dynamodb.DynamoDB {
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -21,7 +21,7 @@ func Connect(alias, accessKey, secretKey, region string) bool {
 	creds := aws.Creds(accessKey, secretKey, "")
 	connections[alias] = dynamodb.New(creds, region, nil)
 
-	return true
+	return connections[alias]
 }
 
 // Remove a connection from the list. Returns true if the connection was removed
