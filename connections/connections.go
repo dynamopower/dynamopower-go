@@ -1,16 +1,50 @@
 package connections
 
 import (
-	"github.com/awslabs/aws-sdk-go/aws"
-	"github.com/awslabs/aws-sdk-go/gen/dynamodb"
+	"errors"
+
 	"github.com/dynamopower/dynamopower-go/constants"
 )
 
-var connections = make(map[string]*dynamodb.DynamoDB)
+var connections = make(map[string]Connection)
 
-// Connect to DynamoDB. Set region to "local" to connect
+// Disconnect all connections
+func DisconnectAll() {
+	for alias, _ := range connections {
+		Deregister(alias)
+	}
+}
+
+// Deregister a connection
+func Deregister(alias string) {
+	if alias == "" {
+		alias = constants.DEFAULTCONNECTION
+	}
+
+	if _, ok := connections[alias]; ok {
+		delete(connections, alias)
+	}
+}
+
+// Get a connection. nil is returned if the connection does not exist
+func Get(alias string) (connection Connection) {
+	if alias == "" {
+		alias = constants.DEFAULTCONNECTION
+	}
+
+	connection = connections[alias]
+	return
+}
+
+// List all connection names
+func List() map[string]Connection {
+	return connections
+}
+
+// Register DynamoDB configuration. Set region to "local" to connect
 // to DynamoDB Local on port 8000
-func Connect(alias, accessKey, secretKey, region string) *dynamodb.DynamoDB {
+func Register(alias, accessKey, secretKey, region string) (connection Connection, err error) {
+	// Set default alias and region
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -18,46 +52,23 @@ func Connect(alias, accessKey, secretKey, region string) *dynamodb.DynamoDB {
 		region = constants.DEFAULTREGION
 	}
 
-	creds := aws.Creds(accessKey, secretKey, "")
-	connections[alias] = dynamodb.New(creds, region, nil)
-
-	return connections[alias]
-}
-
-// Remove a connection from the list. Returns true if the connection was removed
-func Disconnect(alias string) bool {
-	if alias == "" {
-		alias = constants.DEFAULTCONNECTION
+	// Ensure that the connection name is unique
+	if _, exists := connections[alias]; exists {
+		err := errors.New("Connection already exists")
+		return Connection{}, err
 	}
 
-	if _, ok := connections[alias]; ok {
-		delete(connections, alias)
-		return true
-	}
-	return false
-}
+	// Create the connection object
+	connection = Connection{
+		accessKey: accessKey,
+		secretKey: secretKey,
+		region:    region}
 
-// Get a connection. nil is returned if the connection does not exist
-func Get(alias string) *dynamodb.DynamoDB {
-	if alias == "" {
-		alias = constants.DEFAULTCONNECTION
-	}
+	// Connect to DynamoDB
+	connection.Connect()
 
-	if connection, ok := connections[alias]; ok {
-		return connection
-	}
-	return nil
-}
+	// Add the connection to the list
+	connections[alias] = connection
 
-// List all connections
-func List() []string {
-	keys := make([]string, len(connections))
-
-	i := 0
-	for key := range connections {
-		keys[i] = key
-		i += 1
-	}
-
-	return keys
+	return connection, err
 }
