@@ -6,7 +6,7 @@ import (
 	"github.com/dynamopower/dynamopower-go/constants"
 )
 
-var connections = make(map[string]Connection)
+var connections = make(map[string]Connector)
 
 // Disconnect all connections
 func DisconnectAll() {
@@ -27,7 +27,7 @@ func Deregister(alias string) {
 }
 
 // Get a connection. nil is returned if the connection does not exist
-func Get(alias string) (connection Connection) {
+func Get(alias string) (connection Connector) {
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
 	}
@@ -37,13 +37,15 @@ func Get(alias string) (connection Connection) {
 }
 
 // List all connection names
-func List() map[string]Connection {
+func List() map[string]Connector {
 	return connections
 }
 
 // Register DynamoDB configuration. Set region to "local" to connect
 // to DynamoDB Local on port 8000
-func Register(alias, accessKey, secretKey, region string) (connection Connection, err error) {
+func Register(alias, accessKey, secretKey, region string) (Connector, error) {
+	var err error
+
 	// Set default alias and region
 	if alias == "" {
 		alias = constants.DEFAULTCONNECTION
@@ -54,12 +56,12 @@ func Register(alias, accessKey, secretKey, region string) (connection Connection
 
 	// Ensure that the connection name is unique
 	if _, exists := connections[alias]; exists {
-		err := errors.New("Connection already exists")
-		return Connection{}, err
+		err = errors.New("Connection already exists")
+		return new(Connection), err
 	}
 
 	// Create the connection object
-	connection = Connection{
+	connection := Connection{
 		accessKey: accessKey,
 		secretKey: secretKey,
 		region:    region}
@@ -68,7 +70,7 @@ func Register(alias, accessKey, secretKey, region string) (connection Connection
 	connection.Connect()
 
 	// Add the connection to the list
-	connections[alias] = connection
+	connections[alias] = &connection
 
-	return connection, err
+	return &connection, err
 }
