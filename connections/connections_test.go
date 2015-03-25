@@ -64,6 +64,20 @@ func (suite *ConnectionsTestSuite) Deregister() {
 	assert.Equal(suite.T(), len(connections.List()), 0)
 }
 
+func (suite *ConnectionsTestSuite) Get() {
+	assert.Equal(suite.T(), len(connections.List()), 1)
+
+	// Register a new connection
+	_, err := connections.Register("test", "abc", "123", "local")
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), len(connections.List()), 2)
+
+	connection1 := connections.Get("")
+	connection2 := connections.Get("test")
+	assert.NotNil(suite.T(), connection1)
+	assert.NotNil(suite.T(), connection2)
+}
+
 // Make the test suite available to go test
 func TestConnectionsTestSuite(t *testing.T) {
 	suite.Run(t, new(ConnectionsTestSuite))
