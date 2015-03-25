@@ -50,7 +50,7 @@ func (suite *ConnectionsTestSuite) TestDisconnectAll() {
 	assert.Equal(suite.T(), len(connections.List()), 0)
 }
 
-func (suite *ConnectionsTestSuite) Deregister() {
+func (suite *ConnectionsTestSuite) TestDeregister() {
 	assert.Equal(suite.T(), len(connections.List()), 1)
 
 	// Register a new connection
@@ -64,7 +64,7 @@ func (suite *ConnectionsTestSuite) Deregister() {
 	assert.Equal(suite.T(), len(connections.List()), 0)
 }
 
-func (suite *ConnectionsTestSuite) Get() {
+func (suite *ConnectionsTestSuite) TestGet() {
 	assert.Equal(suite.T(), len(connections.List()), 1)
 
 	// Register a new connection
@@ -76,6 +76,13 @@ func (suite *ConnectionsTestSuite) Get() {
 	connection2 := connections.Get("test")
 	assert.NotNil(suite.T(), connection1)
 	assert.NotNil(suite.T(), connection2)
+}
+
+func (suite *ConnectionsTestSuite) TestList() {
+	assert.Equal(suite.T(), len(connections.List()), 1)
+	_, err := connections.Register("test", "abc", "123", "local")
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), len(connections.List()), 2)
 }
 
 // Make the test suite available to go test
