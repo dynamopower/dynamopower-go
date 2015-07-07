@@ -1,8 +1,8 @@
 package connections
 
 import (
-	"github.com/awslabs/aws-sdk-go/aws"
-	"github.com/awslabs/aws-sdk-go/gen/dynamodb"
+	"github.com/aws/aws-sdk-go/aws/crendentials"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 type Connection struct {
@@ -14,6 +14,6 @@ type Connection struct {
 
 // Connect to DynamoDB
 func (c *Connection) Connect() {
-	creds := aws.Creds(c.accessKey, c.secretKey, "")
+	creds := crendentials.NewStaticCredentials(c.accessKey, c.secretKey, "")
 	c.connection = dynamodb.New(creds, c.region, nil)
 }
